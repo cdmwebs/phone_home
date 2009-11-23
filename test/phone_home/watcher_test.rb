@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
-class WatcherTest < Test::Unit::TestCase
+class PhoneHome::WatcherTest < Test::Unit::TestCase
   context "initialization" do
     should "require an io and a match" do
       assert_raise ArgumentError do

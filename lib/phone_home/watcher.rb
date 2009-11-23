@@ -33,9 +33,9 @@ class PhoneHome
 
         case 
         when @response.code =~ /^5.*/
-          PhoneHome.log 'Could not contact the remote watch file server'
+          PhoneHome::Base.log 'Could not contact the remote watch file server'
         when @response.code =~ /^4.*/
-          PhoneHome.log 'Watch file not found on remote server'
+          PhoneHome::Base.log 'Watch file not found on remote server'
         when @response.code == '200' 
           return @response.body
         else

@@ -9,6 +9,20 @@ class PhoneHome
   def initialize(url)
     @watcher = PhoneHome::Watcher.new(url, 'ok')
 
+    @screen  = PhoneHome::ImageCapture.new :command     => '/usr/sbin/screencapture -x -m -t jpg -T 1', 
+                                           :output_path => output_folder, 
+                                           :image_name  => 'screen'
+
+    @camera  = PhoneHome::ImageCapture.new :command     => '/usr/local/bin/isightcapture -n 1 -t jpg -w 640 -h 480',
+                                           :output_path => output_folder, 
+                                           :image_name  => 'screen'
+
+    @uploader = PhoneHome::Upload.new :host_name   => '26webs.com',
+                                      :user_name   => 'cdmwebs',
+                                      :local_path  => output_folder,
+                                      :remote_path => 'mac-status',
+                                      :ssh_key     => '/Users/cdmwebs/.ssh/id_rsa.pub'
+
     unless @watcher.matches?
       tell_server
     end
@@ -16,9 +30,9 @@ class PhoneHome
 
   def tell_server
     write_output
-    capture_screen
-    capture_image
-    upload
+    @screen.capture
+    @camera.capture
+    @uploader.post
     #cleanup
   end
 
@@ -53,20 +67,6 @@ class PhoneHome
     end
   end
 
-  def capture_screen
-    @screen_capture ||= PhoneHome::ImageCapture.new :command     => '/usr/sbin/screencapture -x -m -t jpg -T 1', 
-                                                    :output_path => output_folder, 
-                                                    :image_name  => 'screen'
-    @screen_capture.capture
-  end
-
-  def capture_image
-    @image_capture  ||= PhoneHome::ImageCapture.new :command     => '/usr/local/bin/isightcapture -n 1 -t jpg -w 640 -h 480',
-                                                    :output_path => output_folder, 
-                                                    :image_name  => 'screen'
-    @image_capture.capture
-  end
-
   def write_output
     line = "IP Address: #{external_ip}\nComputer Name: #{computer_name}Logged In: #{logged_in}Last Users:\n#{last_users}"
     folder = FileUtils.mkdir_p(output_folder)
@@ -83,24 +83,6 @@ class PhoneHome
 
   def output_folder
     return '/tmp/output'
-  end
-
-  def host_name
-    return '26webs.com'
-  end
-
-  def user_name
-    return 'cdmwebs'
-  end
-
-  def remote_path
-    return 'mac-status'
-  end
-
-  def upload
-    Net::SCP.upload!(host_name, user_name, output_folder, remote_path, :key => '/Users/cdmwebs/.ssh/id_rsa.pub', :recursive => true) do |ch, name, sent, total|
-      puts "#{name}: #{sent}/#{total}"
-    end
   end
 
   def cleanup
