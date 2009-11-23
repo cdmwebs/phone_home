@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'net/http'
 require 'net/scp'
 require 'open-uri'
@@ -7,22 +8,11 @@ class PhoneHome
   end
 
   def initialize(url)
-    @url = URI.parse(url)
+    @watcher = PhoneHome::Watcher.new(url, 'ok')
 
-    unless okay?
+    unless @watcher.matches?
       tell_server
     end
-  end
-
-  def check_status
-    @response = Net::HTTP.start(@url.host, @url.port) do |http|
-      http.get(@url.path)
-    end
-    return @response.body.gsub!(/\n/, '')
-  end
-
-  def okay?
-    check_status == 'ok'
   end
 
   def tell_server
@@ -118,5 +108,9 @@ class PhoneHome
   end
 end
 
-directory = File.expand_path(File.dirname(__FILE__))
-require File.join(directory, 'phone_home', 'watcher')
+directory = File.expand_path(File.dirname(__FILE__)) + '/phone_home'
+Dir.glob(directory + '/*.rb').each do |required_file|
+  require required_file
+end
+# require File.join(directory, 'phone_home', 'logger')
+# require File.join(directory, 'phone_home', 'watcher')
