@@ -4,8 +4,7 @@ require 'net/scp'
 require 'open-uri'
 
 class PhoneHome
-  class ConfigurationError < StandardError
-  end
+  class ConfigurationError < StandardError; end
 
   def initialize(url)
     @watcher = PhoneHome::Watcher.new(url, 'ok')
@@ -55,11 +54,17 @@ class PhoneHome
   end
 
   def capture_screen
-    `/usr/sbin/screencapture -x -m -t jpg -T 1 "#{output_folder}/#{safe_date}-screen.jpg"`
+    @screen_capture ||= PhoneHome::ImageCapture.new :command     => '/usr/sbin/screencapture -x -m -t jpg -T 1', 
+                                                    :output_path => output_folder, 
+                                                    :image_name  => 'screen'
+    @screen_capture.capture
   end
 
   def capture_image
-    `/usr/local/bin/isightcapture -n 1 -t jpg -w 640 -h 480 "#{output_folder}/#{safe_date}-isight.jpg"`
+    @image_capture  ||= PhoneHome::ImageCapture.new :command     => '/usr/local/bin/isightcapture -n 1 -t jpg -w 640 -h 480',
+                                                    :output_path => output_folder, 
+                                                    :image_name  => 'screen'
+    @image_capture.capture
   end
 
   def write_output
@@ -103,8 +108,8 @@ class PhoneHome
   end
 
   def logger(msg)
-    require 'syslog'
-    Syslog.info(msg)
+    @logger ||= PhoneHome::Logger.new
+    @logger.puts msg
   end
 end
 
@@ -112,5 +117,3 @@ directory = File.expand_path(File.dirname(__FILE__)) + '/phone_home'
 Dir.glob(directory + '/*.rb').each do |required_file|
   require required_file
 end
-# require File.join(directory, 'phone_home', 'logger')
-# require File.join(directory, 'phone_home', 'watcher')
