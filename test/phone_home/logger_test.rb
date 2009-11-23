@@ -2,11 +2,12 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class LoggerTest < Test::Unit::TestCase
   context "initialization" do
-    should "require an output stream" do
-      assert_raise ArgumentError do
-        PhoneHome::Logger.new
-      end
+    should "default logging to Syslog if no io stream is specified" do
+      phone_home = PhoneHome::Logger.new
+      assert_equal Syslog, phone_home.instance_variable_get(:@output_stream)
+    end
 
+    should "permit the logging to be directed to another output stream" do
       assert_nothing_raised do
         PhoneHome::Logger.new STDOUT
       end
