@@ -1,5 +1,3 @@
-# require 'httparty'
-
 class PhoneHome
   class Base
     attr_accessor :logger

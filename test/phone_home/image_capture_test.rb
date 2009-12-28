@@ -37,7 +37,7 @@ class PhoneHome::ImageCaptureTest < Test::Unit::TestCase
   context 'capturing an image' do
     setup do
       @command ="/usr/sbin/screencapture -x -m -t jpg -T 1"  
-      @output_path = File.join(File.dirname(__FILE__), 'images') 
+      @output_path = File.join('/tmp/images') 
 
       @image_capture = PhoneHome::ImageCapture.new :command     => @command,
                                                    :output_path => @output_path,
@@ -45,14 +45,14 @@ class PhoneHome::ImageCaptureTest < Test::Unit::TestCase
     end
 
     should "write to the output path when asked to capture" do
-      precapture_count = count_files_in_folder(@output_path, "*-screen.jpg")
+      precapture_count = count_files_in_folder(@output_path, "*screen*")
       @image_capture.capture
-      postcapture_count = count_files_in_folder(@output_path, "*-screen.jpg")
-      assert_equal precapture_count+1, postcapture_count
+      postcapture_count = count_files_in_folder(@output_path, "*screen*")
+      assert_equal precapture_count + 1, postcapture_count
     end
   end
 
   def count_files_in_folder(folder, file_mask)
-    Dir.glob(folder + file_mask).size 
+    Dir.glob(File.join(folder, file_mask)).size 
   end
 end
