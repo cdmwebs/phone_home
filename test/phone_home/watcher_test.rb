@@ -68,8 +68,8 @@ class PhoneHome::WatcherTest < Test::Unit::TestCase
     end
 
     should "write to the logger" do
-      PhoneHome.expects(:log).with('Watch file not found on remote server')
-      assert_equal @watcher.matches?, false
+      PhoneHome::Base.expects(:log).with('Watch file not found on remote server')
+      assert !@watcher.matches?
     end
   end
 

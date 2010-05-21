@@ -1,3 +1,5 @@
+gem 'net-scp', '>= 1.0.2'
+
 require 'rubygems'
 require 'net/http'
 require 'net/scp'
